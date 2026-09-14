@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# FR!sky Paperclip — the agent desk
+# Frisky Developments LLC · New Mexico, USA
+set -euo pipefail
+
+VERSION="0.1.1"
+DESK="${PAPERCLIP_DESK:-https://clip.friskydev.com}"
+PAY="${PAPERCLIP_PAY:-https://whop.com/checkout/plan_4WRbqNWxmh5SG}"
+
+usage() {
+  cat <<U
+paperclip ${VERSION}  ·  FR!sky Paperclip  ·  the agent desk
+
+  paperclip            open the desk
+  paperclip pay        open Whop checkout
+  paperclip --version
+  paperclip --help
+
+Desk ${DESK}
+Pay  ${PAY}
+Seat key arrives by Whop email (FRSKY-PC-…).
+U
+}
+
+open_url() {
+  local url="$1"
+  if command -v open >/dev/null 2>&1 && [[ "$(uname -s)" == Darwin ]]; then
+    exec open "$url"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    exec xdg-open "$url"
+  elif command -v gio >/dev/null 2>&1; then
+    exec gio open "$url"
+  else
+    exec python3 -m webbrowser "$url"
+  fi
+}
+
+case "${1:-}" in
+  -h|--help|help) usage ;;
+  -v|--version|version) echo "paperclip ${VERSION}" ;;
+  pay|buy|checkout) open_url "$PAY" ;;
+  ""|open|desk|run) open_url "$DESK" ;;
+  *)
+    echo "paperclip: unknown command: $1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
